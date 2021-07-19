@@ -87,6 +87,7 @@ const (
 	BlockBuilderLogger   = "blockBuilder"
 	BlockListenerLogger  = "blockListener"
 	BlockHandlerLogger   = "blockHandler"
+	ATXListenerLogger    = "atxListener"
 	PoetListenerLogger   = "poetListener"
 	NipstBuilderLogger   = "nipstBuilder"
 	AtxBuilderLogger     = "atxBuilder"
@@ -187,6 +188,7 @@ type SpacemeshApp struct {
 	hare           HareService
 	atxBuilder     *activation.Builder
 	atxDb          *activation.DB
+	atxListener    *activation.ATXListener
 	poetListener   *activation.PoetListener
 	edSgn          *signing.EdSigner
 	tBeacon        *tortoisebeacon.TortoiseBeacon
@@ -645,6 +647,8 @@ func (app *SpacemeshApp) initServices(ctx context.Context,
 	database.SwitchCreationContext(dbStorepath, "") // currently only blockbuilder uses this mechanism
 	blockProducer := miner.NewBlockBuilder(minerCfg, sgn, swarm, clock.Subscribe(), msh, trtl, blockOracle, syncer, stateAndMeshProjector, app.txPool, app.addLogger(BlockBuilderLogger, lg))
 
+	atxListener := activation.NewATXListener(swarm, atxdb, layerFetch, app.addLogger(ATXListenerLogger, lg))
+
 	poetListener := activation.NewPoetListener(swarm, poetDb, app.addLogger(PoetListenerLogger, lg))
 
 	nipstBuilder := activation.NewNIPSTBuilder(util.Hex2Bytes(nodeID.Key), postClient, poetClient, poetDb, store, app.addLogger(NipstBuilderLogger, lg))
@@ -667,7 +671,6 @@ func (app *SpacemeshApp) initServices(ctx context.Context,
 	atxBuilder := activation.NewBuilder(builderConfig, nodeID, app.Config.SpaceToCommit, sgn, atxdb, swarm, msh, nipstBuilder, postClient, clock, syncer, store, app.addLogger("atxBuilder", lg))
 
 	gossipListener.AddListener(ctx, state.IncomingTxProtocol, priorityq.Low, processor.HandleTxGossipData)
-	gossipListener.AddListener(ctx, activation.AtxProtocol, priorityq.Low, atxdb.HandleGossipAtx)
 	gossipListener.AddListener(ctx, blocks.NewBlockProtocol, priorityq.High, blockListener.HandleBlock)
 	gossipListener.AddListener(ctx, tortoisebeacon.TBProposalProtocol, priorityq.Low, tBeacon.HandleSerializedProposalMessage)
 	gossipListener.AddListener(ctx, tortoisebeacon.TBFirstVotingProtocol, priorityq.Low, tBeacon.HandleSerializedFirstVotingMessage)
@@ -684,6 +687,7 @@ func (app *SpacemeshApp) initServices(ctx context.Context,
 	app.state = processor
 	app.hare = rabbit
 	app.P2P = swarm
+	app.atxListener = atxListener
 	app.poetListener = poetListener
 	app.atxBuilder = atxBuilder
 	app.oracle = blockOracle
@@ -755,6 +759,7 @@ func (app *SpacemeshApp) startServices(ctx context.Context, logger log.Log) erro
 		return fmt.Errorf("cannot start block producer: %w", err)
 	}
 
+	app.atxListener.Start(ctx)
 	app.poetListener.Start(ctx)
 
 	if app.Config.StartMining {

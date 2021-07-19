@@ -28,9 +28,6 @@ var (
 	ErrPoetServiceUnstable = errors.New("builder: poet service is unstable")
 )
 
-// AtxProtocol is the protocol id for broadcasting atxs over gossip
-const AtxProtocol = "AtxGossip"
-
 const defaultPoetRetryInterval = 5 * time.Second
 
 type meshProvider interface {
