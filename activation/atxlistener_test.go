@@ -6,10 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/spacemeshos/go-spacemesh/log"
 	"github.com/spacemeshos/go-spacemesh/p2p/service"
+	"github.com/stretchr/testify/assert"
 )
 
 type atxProcessorMock struct {
@@ -24,9 +23,8 @@ func TestATXListener(t *testing.T) {
 	gossipProvider := &ServiceMock{ch: make(chan service.GossipMessage)}
 	processor := &atxProcessorMock{processedATXs: make(chan service.GossipMessage)}
 	al := NewATXListener(gossipProvider, processor, nil, log.NewDefault("atx listener"))
-	ctx, cancel := context.WithCancel(context.TODO())
 
-	al.Start(ctx)
+	al.Start()
 
 	gossips := []service.GossipMessage{&mockMsg{}, &mockMsg{}, &mockMsg{}}
 	var processed []service.GossipMessage
@@ -49,5 +47,5 @@ func TestATXListener(t *testing.T) {
 	wg.Wait()
 	assert.ElementsMatch(t, gossips, processed)
 
-	cancel()
+	assert.NoError(t, al.Stop())
 }

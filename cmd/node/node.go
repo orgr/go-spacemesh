@@ -759,7 +759,7 @@ func (app *SpacemeshApp) startServices(ctx context.Context, logger log.Log) erro
 		return fmt.Errorf("cannot start block producer: %w", err)
 	}
 
-	app.atxListener.Start(ctx)
+	app.atxListener.Start()
 	app.poetListener.Start(ctx)
 
 	if app.Config.StartMining {
@@ -880,6 +880,11 @@ func (app *SpacemeshApp) stopServices() {
 		log.Info("Stopping tortoise beacon...")
 		// does not return any errors
 		app.tBeacon.Close()
+	}
+
+	if app.atxListener != nil {
+		app.log.Info("stopping ATX listener")
+		app.atxListener.Stop()
 	}
 
 	if app.poetListener != nil {
