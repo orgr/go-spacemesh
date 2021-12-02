@@ -39,7 +39,7 @@ require (
 	github.com/spacemeshos/fixed v0.0.0-20210321020345-0ef1406dc23f
 	github.com/spacemeshos/merkle-tree v0.0.0-20191028110812-1908c3126c82
 	github.com/spacemeshos/poet v0.1.1-0.20201103004828-ef8f28a744fc
-	github.com/spacemeshos/post v0.0.0-20211014030409-e1a8091bb648
+	github.com/spacemeshos/post v0.0.0-20211202171933-d667771f191c
 	github.com/spacemeshos/sha256-simd v0.0.0-20190111104731-8575aafc88c9
 	github.com/spf13/afero v1.2.0 // indirect
 	github.com/spf13/cobra v1.0.0
@@ -58,6 +58,7 @@ require (
 	golang.org/x/tools v0.1.5 // indirect
 	google.golang.org/genproto v0.0.0-20200825200019-8632dd797987
 	google.golang.org/grpc v1.40.0
+	google.golang.org/protobuf v1.27.1
 	nanomsg.org/go-mangos v1.4.0
 )
 
