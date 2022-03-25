@@ -152,14 +152,15 @@ func (suite *AppTestSuite) TestMultipleNodes() {
 		scanner := bufio.NewScanner(io.MultiReader(poetHarness.Stdout, poetHarness.Stderr))
 		for scanner.Scan() {
 			line := scanner.Text()
+			poetLog.Debug(line)
 			matched := errorRegexp.MatchString(line)
 			// Fail fast if we encounter a poet error
 			// Must use a channel since we're running inside a goroutine
 			if matched {
 				suite.T().Errorf("got error from poet: %s", line)
 				close(failChan)
+				break
 			}
-			poetLog.Debug(line)
 		}
 	}()
 
